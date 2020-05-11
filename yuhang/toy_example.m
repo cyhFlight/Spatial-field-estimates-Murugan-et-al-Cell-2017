@@ -15,8 +15,6 @@ x2_c=7;
 xdist=(x1r-x1_c).^2 +(x2r-x2_c).^2;
 y=rho.*exp(-xdist./(2*delta^2))+randn(nsamps,1)*y_noise;  % response+noise
 
-
-
 x1_lim=[-10,10];
 x2_lim=[-10;10];
 imagesc(x1_lim,x2_lim,reshape(y,size(x1)))
@@ -50,7 +48,6 @@ xstim = sparse(1:n_train,xntrp1+n1*(xntrp2-1),1,n_train,n1*n2);
 subplot(323); plot(x1_train,x2_train,'k.'); 
 hold on; plot(x1crs,x2crs,'r.', 'markersize', 8);hold off;
 axis equal; axis tight; box off;
-
 
 %%
 minlens=1;

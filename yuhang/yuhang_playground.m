@@ -1,8 +1,8 @@
 addpath(genpath('/Users/Flight/codes/falkner'))
-folder='/Users/Flight/Downloads/Documents/Falkner Lab/191219_datM749_cageday/';
+folder='/Users/Flight/Downloads/Documents/Falkner Lab/191218_datM745_cageday/';
 %locations=readmatrix('/Users/Flight/Downloads/Documents/Falkner Lab/DeepLabCut_data/191218_datM745_balbcMcage_a-12182019104734-0000DeepCut_resnet50_191219_PMVcagedayDec19shuffle1_1030000.csv');
 animal=folder(end-15:end-9);
-cage='SWFcage';
+cage='BalbcMcage';
 % BalbcMcage, C57Mcage, SWFcage, SWMcage, cleancage
 load([folder cage '.mat']);
 %% crop out first few seconds 
@@ -41,12 +41,21 @@ n2 = length(xp2);
 xntrp1 = interp1(xp1,1:n1,x1crs,'nearest');
 xntrp2 = interp1(xp2,1:n2,x2crs,'nearest');
 xstim = sparse(1:n_train,xntrp1+n1*(xntrp2-1),1,n_train,n1*n2);
+
+% occupancy on grid locations
+[x1x2,~,ic]=unique([x1crs,x2crs],'rows');
+n_x1x2=size(x1x2,1);
+opc=zeros(n_x1x2,1);
+for i=1:n_x1x2
+    opc(i)=sum(ic==i);
+end
 %% run gaussian regression
 minlens=0.1;
 dims=[n1,n2];
 [kest,ASDstats,dd] = fastASD(xstim,y_train,dims,minlens);
 yhat=xstim*kest;
-
+%% 
+R2=1-sum((y_train-yhat).^2)/sum((y_train-mean(yhat)).^2)
 %% Plot occupancy and spatial grid points with data
 figure
 subplot(221)
@@ -64,21 +73,24 @@ title('Signal (z-score) on 2D')
 
 subplot(223)
 yhat=xstim*kest;
-scatter(x1crs,x2crs,100,yhat,'square','filled','MarkerEdgeAlpha',0,'MarkerFaceAlpha',0.5)
+scatter(x1crs,x2crs,100,yhat,'square','filled','MarkerEdgeAlpha',0,'MarkerFaceAlpha',1)
 axis image; box off;
 colormap jet;colorbar
 title('Fitted signal')
 
 subplot(224)
-x1_lim=[min(x1) max(x1)];
-x2_lim=[min(x2) max(x2)];
-imagesc(x1_lim,x2_lim,reshape(kest,dims)')
-hold on 
-scatter(x1_train,x2_train,10,'k','MarkerEdgeAlpha',0.2)
-title("Estimated receptive field")
+% x1_lim=[min(x1) max(x1)];
+% x2_lim=[min(x2) max(x2)];
+% imagesc(x1_lim,x2_lim,reshape(kest,dims)')
+% hold on 
+% scatter(x1_train,x2_train,10,'k','MarkerEdgeAlpha',0.2)
+% title("Estimated receptive field")
+scatter(x1x2(:,1),x1x2(:,2),100,opc,'square','filled','MarkerEdgeAlpha',0)
+title('Occupancy of each grid')
 axis image; box off;
-colormap jet;colorbar
+colormap(gca,flipud(bone));colorbar
 set(gca,'YDir','normal')
+
 sgtitle([animal ': ' cage ' Spatial Fit'])
 %% residuals
 residuals=y_train-yhat;
@@ -96,7 +108,7 @@ plot(time,residuals,'ko','MarkerSize',2)
 xlabel('time (s)')
 ylabel('residuals')
 title('Temporal patterns of residuals')
-axis tight
+axis tight;grid on
 
 subplot(223)
 scatter(x1_train,x2_train,5,abs(residuals),'filled','MarkerFaceAlpha',0.8)
