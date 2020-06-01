@@ -1,19 +1,20 @@
+
+%% modify the part with "%%%"
 addpath(genpath('/Users/Flight/codes/falkner'))
-folder='/Users/Flight/Downloads/Documents/Falkner Lab/191218_datM745_cageday/';
-%locations=readmatrix('/Users/Flight/Downloads/Documents/Falkner Lab/DeepLabCut_data/191218_datM745_balbcMcage_a-12182019104734-0000DeepCut_resnet50_191219_PMVcagedayDec19shuffle1_1030000.csv');
+folder='/Users/Flight/Downloads/Documents/Falkner Lab/191218_datM745_cageday/'; %%%
 animal=folder(end-15:end-9);
-cage='BalbcMcage';
+cage='BalbcMcage'; %%%
 % BalbcMcage, C57Mcage, SWFcage, SWMcage, cleancage
 load([folder cage '.mat']);
 %% crop out first few seconds 
-ini_time=30;
+ini_time=30;  %%%% seconds
 [~,ini_inx]=min(abs(time-time(1)-ini_time));
 time=time(ini_inx:end);
 Cx=Cx(ini_inx:end);
 Cy=Cy(ini_inx:end);
 z_sig=z_sig(ini_inx:end);
 %% filter position
-threshold_quantile=0.98;
+threshold_quantile=0.98; %%%
 x1=repeat_filter_pos(Cx,time,threshold_quantile);
 x2=repeat_filter_pos(Cy,time,threshold_quantile);
 figure
@@ -21,7 +22,7 @@ plot(Cx,Cy,'b-')
 hold on
 plot(x1,x2,'r-')
 %% bin xy coordinates
-nbin_x=20; % roughly number of bins on each dimension
+nbin_x=20; %%% roughly number of bins on each dimension
 binwidth=mean([max(x1)-min(x1),max(x2)-min(x2)])/nbin_x;
 
 n_train=length(x1);
@@ -54,7 +55,7 @@ minlens=0.1;
 dims=[n1,n2];
 [kest,ASDstats,dd] = fastASD(xstim,y_train,dims,minlens);
 yhat=xstim*kest;
-%% 
+%% R^2 as a measure of goodness of fit
 R2=1-sum((y_train-yhat).^2)/sum((y_train-mean(yhat)).^2)
 %% Plot occupancy and spatial grid points with data
 figure
@@ -79,12 +80,6 @@ colormap jet;colorbar
 title('Fitted signal')
 
 subplot(224)
-% x1_lim=[min(x1) max(x1)];
-% x2_lim=[min(x2) max(x2)];
-% imagesc(x1_lim,x2_lim,reshape(kest,dims)')
-% hold on 
-% scatter(x1_train,x2_train,10,'k','MarkerEdgeAlpha',0.2)
-% title("Estimated receptive field")
 scatter(x1x2(:,1),x1x2(:,2),100,opc,'square','filled','MarkerEdgeAlpha',0)
 title('Occupancy of each grid')
 axis image; box off;
@@ -123,7 +118,7 @@ title('Histogram of residuals')
 xlabel('residuals')
 sgtitle([animal ': '  cage ' Residual plots'])
 
-% %% predict on certain points
+% %% predict on certain points once obtain kest
 % x1_test=[540 900 650];
 % x2_test=[440 700 770];
 % yhat_test=predict_new(x1_test,x2_test,kest,xp1,xp2);
@@ -133,6 +128,6 @@ sgtitle([animal ': '  cage ' Residual plots'])
 % imagesc(x1_lim,x2_lim,reshape(kest,dims)')
 % set(gca,'YDir','normal')
 % hold on 
-% scatter(x1_test,x2_test,300,-yhat_test,'filled')
+% scatter(x1_test,x2_test,300,-yhat_test,'filled') %color of predicted points are inversed
 % colormap(jet)
 % axis image

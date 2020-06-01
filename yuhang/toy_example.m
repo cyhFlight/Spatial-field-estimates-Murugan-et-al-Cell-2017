@@ -1,4 +1,5 @@
 %% toy example
+addpath(genpath('/Users/Flight/codes/falkner'))
 
 xx=-10:0.1:10;
 [x1,x2]=meshgrid(xx);
@@ -69,6 +70,7 @@ set(gca,'YDir','normal')
 %% predict
 yhat=xstim*kest;
 figure
+% residual plot
 plot(y_train-mean(y_train)-yhat,'ko');
 
 
